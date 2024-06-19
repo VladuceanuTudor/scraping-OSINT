@@ -10,3 +10,7 @@ deja existente pentru a imi face o idee
 - Am incercat o implementare a unui script de test folosind Selenium pe Ubuntu in VM
 - Am intampinat repetate erori deoarece pentru Selenium doresc sa folosesc o extensie pt. browserul chrome
 - Dupa repetate incercari de a folosii selenium.webdriver.chrome.service pe ubuntu am luat decizia de a lucra la inplementarea proiectului pe Windows, python fiind usor de utilizat indiferent de S.O. folosit. 
+
+19/06/2024
+
+- scriptul sa ia ca input unnume si un prenume sa creeze diverse cobinatii pe baza acestora si ulterior sa caute prin concatenarea la url daca exista un cont pe diverse retele de social media cu acea combinatie de username

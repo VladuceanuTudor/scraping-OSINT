@@ -2,6 +2,9 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 
 # service = Service(executable_path="chromedriver.exe")
@@ -35,8 +38,7 @@ def generate_usernames(first_name, last_name):
 def check_instagram_profile(username):
     service = Service(executable_path="./chromedriver")
     chrome_options = Options()
-    #chrome_options.binary_location = "/usr/bin/google-chrome"  # Adjust this path if necessary
-    chrome_options.add_argument('--headless')  # Run in headless mode
+    #chrome_options.add_argument('--headless')  # Run in headless mode
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
 
@@ -69,6 +71,104 @@ def check_instagram_profile(username):
     finally:
         driver.quit()
 
+# def check_facebook_profile(username):
+#     service = Service(executable_path="./chromedriver")
+#     chrome_options = Options()
+#     #chrome_options.binary_location = "/usr/bin/google-chrome"  # Adjust this path if necessary
+#     #chrome_options.add_argument('--headless')  # Run in headless mode
+#     chrome_options.add_argument('--no-sandbox')
+#     chrome_options.add_argument('--disable-dev-shm-usage')
+
+#     driver = webdriver.Chrome(service=service, options=chrome_options)
+    
+#     try:
+#         driver.get(f"https://www.facebook.com/{username}/")
+#         time.sleep(3)  # Allow time for page to load
+        
+#         if "Page Not Found" in driver.title:
+#             return False
+
+#         try:
+#             # Locate the parent div with aria-label="Allow all cookies"
+#             accept_cookies_div = driver.find_element(By.XPATH, "//*[@id='facebook']/body/div[3]/div[1]/div/div[2]/div/div/div/div/div[2]/div/div[2]/div[1]")
+        
+#             accept_cookies_div.click()
+            
+#             time.sleep(3)
+#             
+#             time.sleep(7)
+#         except Exception as e:
+#             print("No cookie consent dialog found or error: ", e)
+        
+#         buttonX = driver.find_element(By.XPATH, "//*[@id='mount_0_0_zw']/div/div[1]/div/div[5]/div/div/div[1]/div/div[2]/div/div/div/div[1]/div")
+#         buttonX.click()
+#         time.sleep(10) #pt test vizual
+
+#         return True
+    
+#     except Exception as e:
+#         print(f"Error checking FB profile: {str(e)}")
+#         return False
+    
+#     finally:
+#        driver.quit()
+
+
+def check_facebook_profile(username):
+    service = Service(executable_path="./chromedriver")
+    chrome_options = Options()
+    #chrome_options.add_argument('--headless')  
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--disable-dev-shm-usage')
+    chrome_options.add_argument("--ignore-certificate-errors")
+    chrome_options.add_argument("--disable-popup-blocking")
+    chrome_options.add_argument("--incognito")
+
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+
+    try:
+        driver.get(f"https://www.facebook.com/{username}/")
+        WebDriverWait(driver, 10).until(EC.title_contains("Facebook"))  # Wait for the page title to contain "Facebook"
+
+        if "Page Not Found" in driver.title:
+            return False
+
+        try:
+            # Accept cookies if the dialog is present
+            accept_cookies_div = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, "//*[@id='facebook']/body/div[3]/div[1]/div/div[2]/div/div/div/div/div[2]/div/div[2]/div[1]"))
+            )
+            accept_cookies_div.click()
+        except Exception as e:
+            #print("No cookie consent dialog found or error: ", e)
+            return False
+
+        # Wait for the main content to load after accepting cookies
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//*[@aria-label='Close']"))
+        )
+
+        # Click the desired button or element
+        buttonX = driver.find_element(By.XPATH, "//*[@aria-label='Close']")
+        buttonX.click()
+
+        # time.sleep(2)
+        # driver.refresh()  
+        # elements_with_text = driver.find_elements(By.XPATH, "//*[text()]")
+
+
+        # for element in elements_with_text:
+        # print(element.text)
+        return True
+    except Exception as e:
+        #print(f"Error checking Facebook profile: {str(e)}")
+        return False
+
+    finally:
+        driver.quit()
+
+    return True
+
 # Update check_social_media_accounts function to use check_instagram_profile
 def check_social_media_accounts(first_name, last_name):
     base_urls = {
@@ -85,18 +185,21 @@ def check_social_media_accounts(first_name, last_name):
             url_to_check = base_url + username
             if platform == "Instagram":
                 if check_instagram_profile(username):
-                    found_accounts.append((platform, url_to_check))
-            else:
-                if check_url(url_to_check):
-                    found_accounts.append((platform, url_to_check))
-                    #time.sleep(1)  # Add a delay to avoid rate limiting
+                    #found_accounts.append((platform, url_to_check))
+                    print(f"{platform}: {url_to_check}")
 
-    if not found_accounts:
-        print("No social media accounts found.")
-    else:
-        print("Found social media accounts:")
-        for platform, url in found_accounts:
-            print(f"{platform}: {url}")
+            else:
+                if check_facebook_profile(username):
+                    #found_accounts.append((platform, url_to_check))
+                    #time.sleep(1)  # Add a delay to avoid rate limiting
+                    print(f"{platform}: {url_to_check}")
+
+    # if not found_accounts:
+    #     print("No social media accounts found.")
+    # else:
+    #     print("Found social media accounts:")
+    #     for platform, url in found_accounts:
+    #         print(f"{platform}: {url}")
 
 # Example usage
 print("-----------------------------------------------------------------")

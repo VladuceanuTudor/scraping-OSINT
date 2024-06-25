@@ -6,6 +6,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+import os
+import glob
 
 # service = Service(executable_path="chromedriver.exe")
 # driver = webdriver.Chrome(service=service)
@@ -249,18 +251,30 @@ def pdf_func(first_name, last_name):
     
     driver.quit()
 
+def delete_pdfs_in_current_directory():
+    # Obține lista de toate fișierele PDF din directorul curent
+    pdf_files = glob.glob("*.pdf")
+    
+    for pdf_file in pdf_files:
+        try:
+            os.remove(pdf_file)
+            print(f"Deleted: {pdf_file}")
+        except Exception as e:
+            print(f"Error deleting {pdf_file}: {e}")
+
 print("-----------------------------------------------------------------")
 first_name = input("Prenume: ").strip().lower()
 last_name = input("Nume: ").strip().lower()
 usernames = generate_usernames(first_name, last_name)
 print("-----------------------------------------------------------------")
 
-#check_social_media_accounts(usernames)
+check_social_media_accounts(usernames)
 
 print("-----------------------------------------------------------------")
 
 pdf_func(first_name, last_name)
 pdf_func(last_name, first_name)
+delete_pdfs_in_current_directory()
 
 print("-----------------------------------------------------------------")
 

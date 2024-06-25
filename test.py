@@ -170,14 +170,14 @@ def check_facebook_profile(username):
     return True
 
 # Update check_social_media_accounts function to use check_instagram_profile
-def check_social_media_accounts(first_name, last_name):
+def check_social_media_accounts(usernames):
     base_urls = {
         "Facebook": "https://www.facebook.com/",
         "Instagram": "https://www.instagram.com/",
         
     }
 
-    usernames = generate_usernames(first_name, last_name)
+    
     found_accounts = []
 
     for platform, base_url in base_urls.items():
@@ -201,16 +201,66 @@ def check_social_media_accounts(first_name, last_name):
     #     for platform, url in found_accounts:
     #         print(f"{platform}: {url}")
 
-# Example usage
+def setup_driver():
+    service = Service(executable_path="./chromedriver")
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')  # Run in headless mode
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--disable-dev-shm-usage')
+    chrome_options.add_argument("--disable-features=SameSiteByDefaultCookies,CookiesWithoutSameSiteMustBeSecure")
+    chrome_options.add_argument("--ignore-certificate-errors")
+    chrome_options.add_argument("--disable-popup-blocking")
+    chrome_options.add_argument("--incognito")
+
+    # Prevent downloading files
+    prefs = {
+        "download.prompt_for_download": False,
+        "download.directory_upgrade": True,
+        "plugins.always_open_pdf_externally": True  # Open PDFs in Chrome, not download
+    }
+    chrome_options.add_experimental_option("prefs", prefs)
+    
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    return driver
+
+def search_google_for_pdfs(driver, query):
+    search_url = f"https://www.google.com/search?q={query}+filetype:pdf"
+    driver.get(search_url)
+    time.sleep(3)  # Allow time for page to load
+
+    pdf_links = driver.find_elements(By.XPATH, '//a[contains(@href, ".pdf")]')
+    pdf_urls = [link.get_attribute('href') for link in pdf_links]
+    return pdf_urls
+
+def check_pdf_url(driver, url):
+    driver.get(url)
+    time.sleep(1)  # Allow time for page to load
+    print(f"Opened URL: {url}")
+    #print(f"Page title: {driver.title}")
+
+def pdf_func(first_name, last_name):
+    driver = setup_driver()
+    username = first_name + ' ' + last_name
+    print(username)
+    pdf_urls = search_google_for_pdfs(driver, username)
+    
+    for url in pdf_urls:
+        check_pdf_url(driver, url)
+    
+    driver.quit()
+
 print("-----------------------------------------------------------------")
 first_name = input("Prenume: ").strip().lower()
 last_name = input("Nume: ").strip().lower()
+usernames = generate_usernames(first_name, last_name)
 print("-----------------------------------------------------------------")
 
-check_social_media_accounts(first_name, last_name)
+#check_social_media_accounts(usernames)
+
 print("-----------------------------------------------------------------")
 
-
+pdf_func(first_name, last_name)
+pdf_func(last_name, first_name)
 
 print("-----------------------------------------------------------------")
 

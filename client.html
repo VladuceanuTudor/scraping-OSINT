@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSINT Search</title>
     <style>
-        /* Reset default browser styles */
+        
         * {
             margin: 0;
             padding: 0;
@@ -187,6 +187,35 @@
                 });
             }
         }
+        async function searchWeb() {
+            const firstName = document.getElementById('first_name').value;
+            const lastName = document.getElementById('last_name').value;
+
+            const response = await fetch('http://127.0.0.1:5000/search_web', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ first_name: firstName, last_name: lastName }),
+            });
+            const result = await response.json();
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h3>Web Search Results</h3>';
+            result.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                const a = document.createElement('a');
+                a.href = item.url;
+                a.textContent = item.url;
+                a.target = "_blank";
+                div.appendChild(a);
+                const p = document.createElement('p');
+                p.textContent = item.content;
+                div.appendChild(p);
+                resultsDiv.appendChild(div);
+            });
+        }
     </script>
 </head>
 <body>
@@ -201,6 +230,7 @@
             <div class="button-container">
                 <button type="button" onclick="searchSocialMedia()">Search Social Media</button>
                 <button type="button" onclick="searchPDFs()">Search PDFs</button>
+                <button type="button" onclick="searchWeb()">Search Web</button>
             </div>
         </form>
         <div id="results"></div>

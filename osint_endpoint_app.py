@@ -9,6 +9,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
 import requests
 
 app = Flask(__name__)
@@ -188,6 +189,78 @@ def check_facebook_profile(username):
         return False
     finally:
         driver.quit()
+
+def search_google(driver, query):
+    search_url = f"https://www.google.com/search?q={query}"
+    driver.get(search_url)
+    
+    try:
+        accept_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, '//button[@id="W0wltc"]'))
+        )
+        accept_button.click()
+    except TimeoutException:
+        print("No cookies prompt found or error accepting cookies")
+    
+    try:
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//cite[@class="qLRx3b tjvcx GvPZzd cHaqb"]')))
+        result_cites = driver.find_elements(By.XPATH, '//cite[@class="qLRx3b tjvcx GvPZzd cHaqb"]')
+        urls = [cite.text.replace(' › ', '/') for cite in result_cites[:10]]
+    except Exception as e:
+        print(f"Error finding search results: {e}")
+        urls = []
+    
+    return urls
+
+
+def scrape_page(driver, url):
+    try:
+        driver.get(url)
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
+        title = driver.title
+        page_content = driver.find_element(By.TAG_NAME, 'body').text
+        return title, page_content[:500]  
+    except TimeoutException:
+        return None, "Content not available: Page took too long to load."
+    except NoSuchElementException:
+        return None, "Content not available: Element not found on the page."
+    except WebDriverException as e:
+        return None, f"Error scraping {url}: {str(e)}"
+    except Exception as e:
+        return None, f"Unexpected error scraping {url}: {str(e)}"
+
+
+@app.route('/search_web', methods=['POST'])
+def search_web():
+    data = request.json
+    first_name = data.get('first_name').strip().lower()
+    last_name = data.get('last_name').strip().lower()
+    
+    query = f"{first_name} {last_name}"
+    
+    driver = setup_driver()
+    
+    search_results = search_google(driver, query)
+    results = []
+    
+    for url in search_results:
+        title, page_content = scrape_page(driver, url)
+        if title is None or page_content.startswith('Error'):
+            results.append({
+                "url": url,
+                "error": page_content  # Include the error message in results
+            })
+        else:
+            results.append({
+                "url": url,
+                "title": title,
+                "content": page_content[:200]  # Return only first 200 characters of content
+            })
+    
+    driver.quit()
+    
+    return jsonify(results)
+
 
 if __name__ == '__main__':
     app.run(debug=False)

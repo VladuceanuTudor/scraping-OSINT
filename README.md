@@ -24,3 +24,13 @@ deja existente pentru a imi face o idee
         - Sorry, this page isn't available. (daca profilul nu exista)
         - Profilul efectiv daca sunt logat si acesta exista
         Asa ca am conceput functia check_instagram_profile pentru a gestiona cazurile corect.
+
+25/06/2024
+- am adaugat funcionalitatea de cautare a informatiilor in format pdf de pe internet si extragerea link-urilor catre acestea.
+- clientul web bazat pe api un facut de mine care este practic scriptul in python cu anumite modificari si adaptat pentru a fii folosit ca endpoint cu Flask.
+- implementarea functionalitatiilor de request in Js si adaugarea unor Style-uri pentru un aspect mai prielnic al paginii web.
+
+26/06/2024
+- a fost facut un update la instagram care nu imi mai permite sa fac ceea ce faceam anterior.
+- acum conturile  de instagram nu mai pot fii filtrate decat daca utilizatorul este logat fapt care este periculos deoarece acel cont poate fii blocat din cauza scrapingului.
+- si la facebook au avut loc anumite modificari insa acolo nu ma afecteaza deoarece un cont de utlizator este necesar doar daca contul cautat este privat ceea ce oricum nu se incadreaza in ceea ce trebuie sa faca acest script deoarece el cauta doar informatia open-source.

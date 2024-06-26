@@ -186,9 +186,9 @@ def check_social_media_accounts(usernames):
         for username in usernames:
             url_to_check = base_url + username
             if platform == "Instagram":
-                if check_instagram_profile(username):
+                #if check_instagram_profile(username):
                     #found_accounts.append((platform, url_to_check))
-                    print(f"{platform}: {url_to_check}")
+                print(f"{platform}: {url_to_check}")
 
             else:
                 if check_facebook_profile(username):
@@ -272,9 +272,9 @@ check_social_media_accounts(usernames)
 
 print("-----------------------------------------------------------------")
 
-pdf_func(first_name, last_name)
-pdf_func(last_name, first_name)
-delete_pdfs_in_current_directory()
+# pdf_func(first_name, last_name)
+# pdf_func(last_name, first_name)
+# delete_pdfs_in_current_directory()
 
 print("-----------------------------------------------------------------")
 
